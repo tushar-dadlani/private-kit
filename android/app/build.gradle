@@ -119,6 +119,10 @@ def jscFlavor = 'org.webkit:android-jsc:+'
  */
 def enableHermes = project.ext.react.get("enableHermes", false);
 
+def keystorePropertiesFile = rootProject.file("app/private-kit-keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -162,6 +166,32 @@ android {
         }
         
     }
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-DEV"
+        }
+        staging {
+            dimension "env"
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-STAGING"
+        }
+        prod {
+            dimension "env"
+        }
+    }
+   
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['PRIVATE-KIT_RELEASE_KEY_ALIAS']
+            keyPassword keystoreProperties['PRIVATE-KIT_RELEASE_KEY_PASSWORD']
+            storeFile file(keystoreProperties['PRIVATE-KIT_RELEASE_STORE_FILE'])
+            storePassword keystoreProperties['PRIVATE-KIT_RELEASE_STORE_PASSWORD']
+        }
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
