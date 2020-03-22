@@ -31,6 +31,8 @@
 		<key>NSExceptionDomains</key>
 		<dict/>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We'll log your location privately on your device, every five minutes.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We'll log your location privately on your device, every five minutes.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
