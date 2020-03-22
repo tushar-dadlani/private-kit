@@ -16,9 +16,9 @@ import {
 } from 'react-native';
 import colors from "../constants/colors";
 import LocationServices from '../services/LocationService';
-import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 import exportImage from './../assets/images/export.png';
 import news from './../assets/images/newspaper.png';
+import Geolocation from '@react-native-community/geolocation';
 
 import pkLogo from './../assets/images/PKLogo.png';
 
@@ -32,7 +32,9 @@ class LocationTracking extends Component {
         super(props);
         
         this.state = {
-            isLogging:''
+            isLogging:'',
+            lastPosition: 'unknown',
+            initialPosition: 'unknown'
         }
     }
 
@@ -55,7 +57,25 @@ class LocationTracking extends Component {
                 }
         })
         .catch(error => console.log(error))
+
+        
+        Geolocation.getCurrentPosition(
+            position => {
+              const initialPosition = JSON.stringify(position);
+              this.setState({initialPosition});
+            },
+            error => Alert.alert('Error', JSON.stringify(error)),
+            {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+          )
+          
+        Geolocation.watchPosition(position => {
+            const lastPosition = JSON.stringify(position);
+            this.setState({lastPosition});
+          });
+
+
     }
+
     componentWillUnmount() {     BackHandler.removeEventListener("hardwareBackPress", this.handleBackPress);   }   
 
     handleBackPress = () => {     
@@ -74,30 +94,8 @@ class LocationTracking extends Component {
         this.props.navigation.navigate('NewsScreen', {})
     }
 
-    willParticipate =()=> {
-        SetStoreData('PARTICIPATE', 'true').then(() =>
-            LocationServices.start()
-        );
-
-        // Check and see if they actually authorized in the system dialog.
-        // If not, stop services and set the state to !isLogging
-        // Fixes tripleblindmarket/private-kit#129
-        BackgroundGeolocation.checkStatus(({ authorization }) => {
-            if (authorization === BackgroundGeolocation.AUTHORIZED) {
-                this.setState({
-                    isLogging:true
-                })
-            } else if (authorization === BackgroundGeolocation.NOT_AUTHORIZED) {
-                LocationServices.stop(this.props.navigation)
-                this.setState({
-                    isLogging:false
-                })
-            }
-        });
-    }
 
     setOptOut =()=>{
-        LocationServices.stop(this.props.navigation)
         this.setState({
             isLogging:false
         })
